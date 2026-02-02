@@ -4,160 +4,52 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <style>
-  body { 
-    font-family: 'Segoe UI', sans-serif; 
-    background: #1a1a1a; 
-    display: flex; 
-    justify-content: center; 
-    align-items: center;
-    height: 100vh;
-    margin: 0; 
-    overflow: hidden;
-    touch-action: manipulation;
+  body { font-family: 'Segoe UI', sans-serif; background: #1a1a1a; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; touch-action: manipulation; }
+  #game-box { width: 100%; max-width: 450px; height: 100%; max-height: 850px; aspect-ratio: 9 / 16; background: black; border: 3px solid #9b59b6; border-radius: 15px; position: relative; overflow: hidden; cursor: pointer; box-sizing: border-box; }
+  #bg { width: 100%; height: 100%; object-fit: cover; position: absolute; transition: 1s; filter: brightness(0.5); pointer-events: none; }
+  .character-sprite { position: absolute; bottom: 150px; height: 50%; left: 50%; transform: translateX(-50%) scale(0.9); transition: 0.4s ease-in-out; z-index: 1; pointer-events: none; object-fit: contain; }
+  .active { opacity: 1; filter: none; transform: translateX(-50%) scale(1.05); z-index: 5; }
+  .inactive { opacity: 0; transform: translateX(-50%) scale(0.8); }
+  
+  /* HIỆU ỨNG RUNG & NẢY */
+  .shake { animation: shake 0.3s both; }
+  @keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  }
+  .bounce { animation: bounce 0.4s ease; }
+  @keyframes bounce {
+    0%, 100% { bottom: 150px; }
+    50% { bottom: 170px; }
   }
 
-  /* Khung Game dọc chuẩn điện thoại/iPad */
-  #game-box { 
-    width: 100%;
-    max-width: 450px;
-    height: 100%;
-    max-height: 850px;
-    aspect-ratio: 9 / 16;
-    background: black; 
-    border: 3px solid #9b59b6; 
-    border-radius: 15px; 
-    position: relative; 
-    overflow: hidden; 
-    cursor: pointer; 
-    box-sizing: border-box;
-  }
-
-  #bg { 
-    width: 100%; 
-    height: 100%; 
-    object-fit: cover; 
-    position: absolute; 
-    transition: 1s; 
-    filter: brightness(0.5); 
-    pointer-events: none; 
-  }
-
-  /* Nhân vật nằm chính giữa, ngay trên hộp thoại */
-  .character-sprite { 
-    position: absolute; 
-    bottom: 150px; /* Nằm phía trên khung thoại */
-    height: 50%; 
-    left: 50%; /* Căn giữa màn hình */
-    transform: translateX(-50%) scale(0.9); /* Công thức căn giữa chuẩn */
-    transition: 0.4s ease-in-out; 
-    z-index: 1; 
-    pointer-events: none; 
-    object-fit: contain; 
-  }
-
-  /* Hiệu ứng khi nhân vật đang nói */
-  .active { 
-    opacity: 1; 
-    filter: none; 
-    transform: translateX(-50%) scale(1.05); /* Phóng to nhẹ */
-    z-index: 5; 
-  }
-
-  /* Hiệu ứng khi nhân vật không nói (Ẩn đi để không đè nhau) */
-  .inactive { 
-    opacity: 0; 
-    transform: translateX(-50%) scale(0.8);
-  }
-
-  /* Hộp thoại tối ưu cho mobile */
-  #dialog { 
-    position: absolute; 
-    bottom: 15px; 
-    left: 10px; 
-    right: 10px; 
-    background: rgba(0, 0, 0, 0.9); 
-    color: white; 
-    padding: 20px; 
-    border-radius: 15px; 
-    border: 2px solid #9b59b6; 
-    z-index: 10; 
-    min-height: 120px;
-    box-sizing: border-box;
-  }
-
-  #back-btn { 
-    position: absolute; 
-    top: 15px; 
-    left: 15px; 
-    background: rgba(155, 89, 182, 0.8); 
-    color: white; 
-    border: 1px solid white; 
-    border-radius: 8px; 
-    padding: 8px 15px; 
-    font-size: 14px; 
-    z-index: 20; 
-    display: none; 
-  }
-
-  #choices { 
-    position: absolute; 
-    top: 40%; 
-    left: 50%; 
-    transform: translate(-50%, -50%); 
-    z-index: 15; 
-    display: none; 
-    flex-direction: column; 
-    gap: 15px; 
-    width: 85%; 
-  }
-
-  .choice-btn { 
-    background: #9b59b6; 
-    color: white; 
-    border: 2px solid white; 
-    padding: 18px; 
-    border-radius: 12px; 
-    font-weight: bold; 
-    text-align: center; 
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-  }
-
-  .next-icon { 
-    position: absolute; 
-    bottom: 10px; 
-    right: 20px; 
-    font-size: 10px; 
-    color: #9b59b6; 
-    animation: blink 1s infinite; 
-  }
-
+  #dialog { position: absolute; bottom: 15px; left: 10px; right: 10px; background: rgba(0, 0, 0, 0.9); color: white; padding: 20px; border-radius: 15px; border: 2px solid #9b59b6; z-index: 10; min-height: 120px; box-sizing: border-box; }
+  #back-btn { position: absolute; top: 15px; left: 15px; background: rgba(155, 89, 182, 0.8); color: white; border: 1px solid white; border-radius: 8px; padding: 8px 15px; font-size: 14px; z-index: 20; display: none; }
+  #choices { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); z-index: 15; display: none; flex-direction: column; gap: 15px; width: 85%; }
+  .choice-btn { background: #9b59b6; color: white; border: 2px solid white; padding: 18px; border-radius: 12px; font-weight: bold; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+  .next-icon { position: absolute; bottom: 10px; right: 20px; font-size: 10px; color: #9b59b6; animation: blink 1s infinite; }
   @keyframes blink { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
 </style>
 </head>
 <body onclick="handleClick()">
-
 <div id="game-box">
   <img id="bg" src="">
   <img id="char-left" class="character-sprite" src="">
   <img id="char-right" class="character-sprite" src="">
-  
   <button id="back-btn" onclick="goBack(event)">⇠ Quay lại</button>
-  
   <div id="choices"></div>
-  
   <div id="dialog">
     <b id="name" style="color:#ff99cc; font-size: 1.2em;"></b>
     <p id="text-display" style="margin-top: 10px; line-height: 1.6; font-size: 16px;"></p>
     <span id="next-icon" class="next-icon">▼ Chạm để tiếp tục</span>
   </div>
 </div>
-
 <audio id="audio-bgm" loop></audio>
 <audio id="audio-se-click" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
 <audio id="audio-se-choice" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
 
 <script>
-// Tùng có thể sửa nội dung game ở đây
 let charIndex = 0;
 let typingTimer;
 let isTyping = false;
@@ -185,24 +77,12 @@ const scenes = {
   ]
 };
 
-function playSE(id) {
-  const se = document.getElementById(id);
-  se.currentTime = 0;
-  se.play().catch(() => {});
-}
-
-function updateBGM(src) {
-  if (!src || src === currentBgmSrc) return;
-  const bgm = document.getElementById('audio-bgm');
-  currentBgmSrc = src;
-  bgm.src = src;
-  bgm.play().catch(() => {});
-}
+function playSE(id) { const se = document.getElementById(id); se.currentTime = 0; se.play().catch(() => {}); }
+function updateBGM(src) { if (!src || src === currentBgmSrc) return; const bgm = document.getElementById('audio-bgm'); currentBgmSrc = src; bgm.src = src; bgm.play().catch(() => {}); }
 
 function handleClick() {
   const bgm = document.getElementById('audio-bgm');
   if (bgm.paused && currentBgmSrc) bgm.play();
-
   if (isTyping) {
     clearTimeout(typingTimer);
     document.getElementById('text-display').innerHTML = currentFullText;
@@ -219,54 +99,46 @@ function handleClick() {
   }
 }
 
-function saveHistory() {
-    history.push({ scene: currentScene, line: currentLine });
-    document.getElementById('back-btn').style.display = "block";
-}
-
-function goBack(event) {
-    event.stopPropagation();
-    if (history.length > 0) {
-        clearTimeout(typingTimer);
-        let lastState = history.pop();
-        currentScene = lastState.scene;
-        currentLine = lastState.line;
-        if (history.length === 0) document.getElementById('back-btn').style.display = "none";
-        updateScene();
-    }
-}
+function saveHistory() { history.push({ scene: currentScene, line: currentLine }); document.getElementById('back-btn').style.display = "block"; }
+function goBack(event) { event.stopPropagation(); if (history.length > 0) { clearTimeout(typingTimer); let lastState = history.pop(); currentScene = lastState.scene; currentLine = lastState.line; if (history.length === 0) document.getElementById('back-btn').style.display = "none"; updateScene(); } }
 
 function updateScene() {
   const scene = scenes[currentScene][currentLine];
   if(scene.bgm) updateBGM(scene.bgm);
-
   document.getElementById('name').innerHTML = scene.name;
   document.getElementById('bg').src = scene.bg + "?auto=format&fit=crop&q=80&w=800";
-  
   const leftChar = document.getElementById('char-left');
   const rightChar = document.getElementById('char-right');
-
-  // Avatar nhân vật
   leftChar.src = "https://api.dicebear.com/7.x/avataaars/svg?seed=Tung&backgroundColor=transparent";
   rightChar.src = "https://api.dicebear.com/7.x/bottts/svg?seed=Squirrel&backgroundColor=transparent";
 
-  // Logic hiển thị nhân vật nào đang nói ở giữa
   if (scene.name === "Tùng") {
     leftChar.className = "character-sprite active";
     rightChar.className = "character-sprite inactive";
-  } else if (scene.name === "Sóc Máy") {
+  } else {
     leftChar.className = "character-sprite inactive";
     rightChar.className = "character-sprite active";
   }
 
+  // KÍCH HOẠT HIỆU ỨNG
+  const activeChar = scene.name === "Tùng" ? leftChar : rightChar;
+  activeChar.classList.remove("bounce");
+  void activeChar.offsetWidth;
+  activeChar.classList.add("bounce");
+
+  const gameBox = document.getElementById('game-box');
+  gameBox.classList.remove("shake");
+  if (scene.name === "Sóc Máy") {
+    void gameBox.offsetWidth;
+    gameBox.classList.add("shake");
+  }
+
   document.getElementById('next-icon').style.display = "none";
   document.getElementById('choices').style.display = "none";
-  
   const textDisplay = document.getElementById('text-display');
   textDisplay.innerHTML = "";
   charIndex = 0;
   currentFullText = scene.text;
-  
   typeEffect(scene.text, textDisplay);
 }
 
@@ -276,10 +148,7 @@ function typeEffect(txt, element) {
     element.innerHTML += txt.charAt(charIndex);
     charIndex++;
     typingTimer = setTimeout(() => typeEffect(txt, element), 40);
-  } else {
-    isTyping = false;
-    checkShowChoice();
-  }
+  } else { isTyping = false; checkShowChoice(); }
 }
 
 function checkShowChoice() {
@@ -292,14 +161,7 @@ function checkShowChoice() {
             const btn = document.createElement('div');
             btn.className = "choice-btn";
             btn.innerHTML = opt.text;
-            btn.onclick = (e) => {
-                e.stopPropagation();
-                playSE('audio-se-click');
-                saveHistory();
-                currentScene = opt.next;
-                currentLine = 0;
-                updateScene();
-            };
+            btn.onclick = (e) => { e.stopPropagation(); playSE('audio-se-click'); saveHistory(); currentScene = opt.next; currentLine = 0; updateScene(); };
             choiceContainer.appendChild(btn);
         });
         choiceContainer.style.display = "flex";
@@ -307,7 +169,6 @@ function checkShowChoice() {
         document.getElementById('next-icon').style.display = "block";
     }
 }
-
 updateScene();
 </script>
 </body>
